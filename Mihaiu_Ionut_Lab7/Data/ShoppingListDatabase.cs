@@ -1,16 +1,17 @@
 ﻿using System;
+using SQLite;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Mihaiu_Ionut_Lab7.Models;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SQLite;
-using System.Threading.Tasks;
-using Mihaiu_Ionut_Lab7.Models;
 
-namespace Mihaiu_Ionut_Lab7.Data
+namespace MIhaiu_Ionut_Lab7.Data
 {
     public class ShoppingListDatabase
     {
+
         readonly SQLiteAsyncConnection _database;
         public ShoppingListDatabase(string dbPath)
         {
@@ -18,7 +19,52 @@ namespace Mihaiu_Ionut_Lab7.Data
             _database.CreateTableAsync<ShopList>().Wait();
             _database.CreateTableAsync<Product>().Wait();
             _database.CreateTableAsync<ListProduct>().Wait();
+            _database.CreateTableAsync<Shop>().Wait();
         }
+        public Task<int> SaveProductAsync(Product product)
+        {
+            if (product.ID != 0)
+            {
+                return _database.UpdateAsync(product);
+            }
+            else
+            {
+                return _database.InsertAsync(product);
+            }
+        }
+        public Task<int> DeleteProductAsync(Product product)
+        {
+            return _database.DeleteAsync(product);
+        }
+        public Task<List<Product>> GetProductsAsync()
+        {
+            return _database.Table<Product>().ToListAsync();
+        }
+        public Task<int> DeleteListProductAsync(ListProduct listp)
+        {
+            return _database.DeleteAsync(listp);
+        }
+        public Task<List<ListProduct>> GetListProducts()
+        {
+            return _database.QueryAsync<ListProduct>("select * from ListProduct");
+        }
+        public Task<List<Shop>> GetShopsAsync()
+        {
+            return _database.Table<Shop>().ToListAsync();
+        }
+        public Task<int> SaveShopAsync(Shop shop)
+        {
+            if (shop.ID != 0)
+            {
+                return _database.UpdateAsync(shop);
+            }
+            else
+            {
+                return _database.InsertAsync(shop);
+            }
+        }
+
+
         public Task<List<ShopList>> GetShopListsAsync()
         {
             return _database.Table<ShopList>().ToListAsync();
@@ -40,29 +86,13 @@ namespace Mihaiu_Ionut_Lab7.Data
                 return _database.InsertAsync(slist);
             }
         }
+        public Task<int> DeleteShopAsync(Shop shop)
+        {
+            return _database.DeleteAsync(shop);
+        }
         public Task<int> DeleteShopListAsync(ShopList slist)
         {
             return _database.DeleteAsync(slist);
-        }
-
-        public Task<int> SaveProductAsync(Product product)
-        {
-            if (product.ID != 0)
-            {
-                return _database.UpdateAsync(product);
-            }
-            else
-            {
-                return _database.InsertAsync(product);
-            }
-        }
-        public Task<int> DeleteProductAsync(Product product)
-        {
-            return _database.DeleteAsync(product);
-        }
-        public Task<List<Product>> GetProductsAsync()
-        {
-            return _database.Table<Product>().ToListAsync();
         }
         public Task<int> SaveListProductAsync(ListProduct listp)
         {
@@ -83,14 +113,7 @@ namespace Mihaiu_Ionut_Lab7.Data
             + " on P.ID = LP.ProductID where LP.ShopListID = ?",
             shoplistid);
         }
-        public Task<int> DeleteListProductAsync(ListProduct listp)
-        {
-            return _database.DeleteAsync(listp);
-        }
-        public Task<List<ListProduct>> GetListProducts()
-        {
-            return _database.QueryAsync<ListProduct>("select * from ListProduct");
-        }
-    }
-}
 
+    }
+
+}
